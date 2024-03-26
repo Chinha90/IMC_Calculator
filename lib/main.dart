@@ -1,125 +1,167 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    home: Home(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  // Definição de Variáveis
+  String _message = "Coloque o seu Peso e Altura";
+  final TextEditingController _controllerWeight = TextEditingController();
+  final TextEditingController _controllerHeight = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  // Variável para controlar o tamanho da imagem
+  double _imageScale = 1.0;
+
+// Função para criar as caixas de input
+  Widget buildTextField(String label, TextEditingController _controller) {
+    return TextField(
+      controller: _controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.green[900]),
+        border: OutlineInputBorder(),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      // Input do Utilizador
+      style: TextStyle(color: Colors.green),
+      keyboardType: TextInputType.number,
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
+  // Função para fazer reset das caixas de input
+  void _resetFields() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _controllerWeight.text = "";
+      _controllerHeight.text = "";
+      _message = "Coloque o seu Peso e Altura";
+    });
+  }
+
+//Função para calcular IMC
+  void _imcCalculator() {
+    // Substitui vírgulas por pontos
+    String weightString = _controllerWeight.text.replaceAll(',', '.');
+    String heightString = _controllerHeight.text.replaceAll(',', '.');
+
+    // Passar a variável, obtida pelo input(string), para  double
+    double weight = double.parse(weightString);
+    double height = double.parse(heightString) / 100;
+    double imc = weight / (height * height);
+
+    setState(() {
+      if (imc < 18.5) {
+        _message = "Está abaixo do Peso.\nIMC = ${imc.toStringAsFixed(2)} ";
+      } else if (imc >= 18.5 && imc <= 24.9) {
+        _message = "Peso Ideal.\nIMC = ${imc.toStringAsFixed(2)}";
+      } else if (imc >= 24.9 && imc <= 29.9) {
+        _message = "Levemente Acima do Peso.\nIMC = ${imc.toStringAsFixed(2)}";
+      } else if (imc >= 29.9 && imc <= 34.9) {
+        _message = "Obesidade Grau I.\nIMC = ${imc.toStringAsFixed(2)}";
+      } else if (imc >= 34.9 && imc <= 39.9) {
+        _message = "Obesidade Grau II.\nIMC = ${imc.toStringAsFixed(2)}";
+      } else if (imc >= 40) {
+        _message = "Obesidade Grau III.\nIMC = ${imc.toStringAsFixed(2)}";
+      }
+    });
+  }
+
+  // Função para alterar o tamanho da imagem
+  void _changeImageScale(bool isTapped) {
+    setState(() {
+      _imageScale = isTapped ? 1.2 : 1.0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        backgroundColor: Color.fromRGBO(201, 254, 165, 0.988),
+        title: const Text("Calculadora de IMC"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _resetFields();
+            },
+          )
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 20.0),
+        child:
+            // Criar um Form para trabalhar os dados
+            Form(
+          key: _formKey,
+
+          // Coluna com o conteúdo da página
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const SizedBox(height: 80),
+              GestureDetector(
+                onTapDown: (_) => _changeImageScale(true), // Aumenta o scale
+                onTapUp: (_) =>
+                    _changeImageScale(false), // Retorna ao scale original
+                onTapCancel: () => _changeImageScale(
+                    false), // Retorna ao scale original se o toque for cancelado
+                child: Transform.scale(
+                  scale: _imageScale,
+                  child: Image.asset("assets/images/imc.png", height: 220),
+                ),
+              ),
+              const SizedBox(height: 50),
+              //Input de Peso
+              buildTextField("Peso (kg)", _controllerWeight),
+              // Separador
+              const SizedBox(height: 20),
+              // Input Altura
+              buildTextField("Altura (cm)", _controllerHeight),
+              const SizedBox(height: 30),
+
+              // Botão
+              ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _imcCalculator();
+                    }
+                  },
+                  child: const Text('Calcular',
+                      style: const TextStyle(
+                          fontSize: 15,
+                          color: Color.fromRGBO(42, 100, 3, 0.984))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(201, 254, 165, 0.988),
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  )),
+              const SizedBox(height: 30),
+
+              // Mensagem de resultado e inicio
+              Text(
+                _message,
+                style: const TextStyle(
+                    fontSize: 17, color: Color.fromRGBO(42, 100, 3, 0.984)),
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
